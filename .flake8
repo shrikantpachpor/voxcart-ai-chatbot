@@ -1,0 +1,6 @@
+[flake8]
+# Select B608 for hardcoded SQL expressions (SQL injection)
+select = B608
+# Ignore specific style errors: line length, trailing whitespace, unused imports
+ignore = E501,W391,F401
+max-line-length = 120
