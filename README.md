@@ -1,6 +1,6 @@
 # VoxCart - AI E-commerce Chatbot Platform
-
 An intelligent, full-stack e-commerce chatbot system powered by FastAPI, React, and OpenAI. VoxCart provides conversational commerce capabilities including product search, cart management, order tracking, and customer support through natural language interactions.
+Production-grade AI e-commerce chatbot built as a controlled security research target. GPT-3.5-turbo + LangChain + FastAPI + PostgreSQL + React. Systematically attacked using Garak and Giskard before and after hardening. 
 
 ## 🌟 Features
 
