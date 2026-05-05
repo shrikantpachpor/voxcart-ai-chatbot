@@ -40,7 +40,7 @@ Production-grade AI e-commerce chatbot built as a controlled security research t
 1. Clone and navigate to the project:
 
 ```powershell
-git clone https://github.com/shrikantpachpor/voxcart.git
+git clone https://github.com/shrikantpachpor/voxcart-ai-chatbot.git
 cd voxcart
 ```
 
