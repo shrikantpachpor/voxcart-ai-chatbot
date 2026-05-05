@@ -237,5 +237,6 @@ For issues and questions, please open a GitHub issue.
 
 ---
 
-Research and development by Shrikant Pachpor
+Research and development by Shrikant Pachpor  
+[linkedin.com/in/shrikantpachpor](https://linkedin.com/in/shrikantpachpor)
 
