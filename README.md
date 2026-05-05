@@ -1,6 +1,8 @@
 # VoxCart - AI E-commerce Chatbot Platform
-An intelligent, full-stack e-commerce chatbot system powered by FastAPI, React, and OpenAI. VoxCart provides conversational commerce capabilities including product search, cart management, order tracking, and customer support through natural language interactions.
-Production-grade AI e-commerce chatbot built as a controlled security research target. GPT-3.5-turbo + LangChain + FastAPI + PostgreSQL + React. Systematically attacked using Garak and Giskard before and after hardening. 
+Production-grade AI e-commerce chatbot built as a controlled security 
+research target. GPT-3.5-turbo + LangChain + FastAPI + PostgreSQL + React. 
+Used as the research target for systematic LLM vulnerability assessment 
+using Garak and Giskard. This repository contains the pre-hardening version.
 
 ## 🌟 Features
 
@@ -198,7 +200,21 @@ This project includes security best practices:
 - CORS configuration
 - Input sanitization
 
-**Note**: This project is designed for educational purposes. For production use, conduct a thorough security review.
+This repository is the research target used in a systematic LLM 
+vulnerability assessment. This is the pre-hardening version, 
+intentionally representing a default GPT-3.5-turbo deployment 
+with no AI-specific security measures applied.
+
+Assessment was conducted using Garak and Giskard against OWASP 
+Top 10 for LLM Applications vulnerability categories.
+
+Findings before hardening:
+- DAN jailbreak resistance: 0%
+- Spam and phishing detection: 17%
+- Harmful content injection resistance: 10.6%
+
+Full findings, business impact analysis, and remediation methodology 
+are documented in the case study. Available on request.
 
 ## 📄 License
 
@@ -221,4 +237,5 @@ For issues and questions, please open a GitHub issue.
 
 ---
 
-Made with ❤️ by VoxCart Contributors
+Research and development by Shrikant Pachpor
+
