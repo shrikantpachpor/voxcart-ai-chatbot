@@ -1,22 +1,3 @@
-The changes did not go through. The README is byte-for-byte identical to before: still 224 lines, 5.42 KB, same content throughout. Your commit either didn't save or went somewhere else.
-The most reliable fix is to skip partial editing entirely. Here is the complete, final README. You will select all the text in the editor and replace it in one paste.
-
-Step by step, exactly:
-
-Go to: https://github.com/shrikantpachpor/voxcart-ai-chatbot/blob/main/README.md
-Click the pencil icon (top right of the file, says "Edit this file" on hover)
-Once inside the editor, press Ctrl+A to select everything
-Delete it all
-Paste the entire block below
-Click the green "Commit changes" button (top right of editor)
-In the popup: keep "Commit directly to the main branch" selected
-Click the green "Commit changes" button in the popup
-
-
-Here is the complete replacement README. Copy everything between the two horizontal lines:
-
-markdown# VoxCart - AI Security Research Platform
-
 VoxCart is a full-stack, production-representative AI e-commerce chatbot built specifically as a controlled research target for systematic LLM vulnerability assessment. This repository contains the pre-hardening version. The complete methodology, scan results, and hardening architecture are documented in the published case study.
 
 Contact: shri.pachpor24@gmail.com
