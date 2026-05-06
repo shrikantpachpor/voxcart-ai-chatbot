@@ -14,7 +14,6 @@ After implementing a four-layer hardening architecture (LLM-Guard input scanning
 
 The hardening implementation is not in this repository. It is private IP. The pre-hardening codebase is published so any engineer with Garak installed can independently reproduce the baseline findings and verify the research is not fabricated.
 
-Full methodology and findings: shri.pachpor24@gmail.com
 
 ## Technology Stack
 
