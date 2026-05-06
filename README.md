@@ -1,6 +1,5 @@
 VoxCart is a full-stack, production-representative AI e-commerce chatbot built specifically as a controlled research target for systematic LLM vulnerability assessment. This repository contains the pre-hardening version. The complete methodology, scan results, and hardening architecture are documented in the published case study.
 
-Contact: shri.pachpor24@gmail.com
 
 ## Security Research
 
