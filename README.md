@@ -1,22 +1,62 @@
-# VoxCart - AI E-commerce Chatbot Platform
-Production-grade AI e-commerce chatbot built as a controlled security 
-research target. GPT-3.5-turbo + LangChain + FastAPI + PostgreSQL + React. 
-Used as the research target for systematic LLM vulnerability assessment 
-using Garak and Giskard. This repository contains the pre-hardening version.
+The changes did not go through. The README is byte-for-byte identical to before: still 224 lines, 5.42 KB, same content throughout. Your commit either didn't save or went somewhere else.
+The most reliable fix is to skip partial editing entirely. Here is the complete, final README. You will select all the text in the editor and replace it in one paste.
 
-## 🌟 Features
+Step by step, exactly:
 
-- **AI-Powered Conversations**: GPT-3.5-turbo with LangChain for intelligent chat responses
-- **E-commerce Functions**: Product search, cart management, checkout, order tracking
-- **Vector Search**: ChromaDB and FAISS for semantic product search
-- **User Authentication**: JWT-based auth with secure password hashing
-- **Payment Processing**: Integrated payment service with card tokenization
-- **Modern Frontend**: React with TypeScript, Tailwind CSS
-- **RESTful API**: FastAPI with automatic OpenAPI documentation
+Go to: https://github.com/shrikantpachpor/voxcart-ai-chatbot/blob/main/README.md
+Click the pencil icon (top right of the file, says "Edit this file" on hover)
+Once inside the editor, press Ctrl+A to select everything
+Delete it all
+Paste the entire block below
+Click the green "Commit changes" button (top right of editor)
+In the popup: keep "Commit directly to the main branch" selected
+Click the green "Commit changes" button in the popup
 
-## 🏗️ Architecture
 
-```
+Here is the complete replacement README. Copy everything between the two horizontal lines:
+
+markdown# VoxCart - AI Security Research Platform
+
+VoxCart is a full-stack, production-representative AI e-commerce chatbot built specifically as a controlled research target for systematic LLM vulnerability assessment. This repository contains the pre-hardening version. The complete methodology, scan results, and hardening architecture are documented in the published case study.
+
+Contact: shri.pachpor24@gmail.com
+
+## Security Research
+
+This repository is the pre-hardening version of VoxCart, published to document real LLM vulnerability findings. Results from Garak and Giskard before hardening:
+
+- DAN jailbreak resistance: 0% (full safety bypass on every tested attempt)
+- Harmful content injection resistance: 10.6%
+- Spam and phishing detection: 17.3%
+- XSS-style data exfiltration resistance: 50%
+
+After implementing a four-layer hardening architecture (LLM-Guard input scanning, semantic defence pipeline, LLM-Guard output scanning, session-level rate limiting), all probes reached 100% resistance and ethical issues reduced by 33%.
+
+The hardening implementation is not in this repository. It is private IP. The pre-hardening codebase is published so any engineer with Garak installed can independently reproduce the baseline findings and verify the research is not fabricated.
+
+Full methodology and findings: shri.pachpor24@gmail.com
+
+## Technology Stack
+
+**AI / LLM**
+- OpenAI GPT-3.5-turbo + LangChain: conversational intelligence and orchestration
+
+**Vector Search (RAG)**
+- FAISS + ChromaDB: semantic product search
+
+**Backend**
+- FastAPI (Python) + SQLAlchemy ORM: REST endpoints, business logic, data access
+
+**Database**
+- PostgreSQL + Alembic migrations
+
+**Authentication**
+- JWT tokens + bcrypt password hashing
+
+**Frontend**
+- React + TypeScript + Tailwind CSS + Vite
+
+## Architecture
 ├── app/                    # Main FastAPI application
 │   ├── api/               # API endpoints
 │   ├── core/              # Database, security, logging
@@ -26,9 +66,8 @@ using Garak and Giskard. This repository contains the pre-hardening version.
 ├── frontend/              # React TypeScript application
 ├── alembic/               # Database migrations
 └── tests/                 # Test suite
-```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -40,203 +79,48 @@ using Garak and Giskard. This repository contains the pre-hardening version.
 ### Backend Setup
 
 1. Clone and navigate to the project:
-
-```powershell
 git clone https://github.com/shrikantpachpor/voxcart-ai-chatbot.git
-cd voxcart
-```
+cd voxcart-ai-chatbot
 
 2. Create and activate virtual environment:
-
-```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1  # Windows
-# or: source .venv/bin/activate  # Linux/Mac
-```
+..venv\Scripts\Activate.ps1  # Windows
+source .venv/bin/activate     # Linux/Mac
 
 3. Install dependencies:
-
-```powershell
 pip install .
-# or with Poetry: poetry install
-```
 
 4. Configure environment variables:
-
-```powershell
 cp .env.template .env
-# Edit .env and add your values:
-# - OPENAI_API_KEY
-# - SESSION_SECRET_KEY
-# - DB_USER, DB_PASSWORD, DB_HOST, DB_NAME
-```
 
 5. Run database migrations:
-
-```powershell
 alembic upgrade head
-```
 
 6. Start the backend server:
-
-```powershell
 uvicorn app.main:app --reload
-```
-
-The API will be available at `http://localhost:8000`
-- API Documentation: `http://localhost:8000/docs`
 
 ### Frontend Setup
 
-1. Navigate to frontend directory:
-
-```powershell
+1. Navigate to frontend directory and install dependencies:
 cd frontend
-```
-
-2. Install dependencies:
-
-```powershell
 npm install
-```
 
-3. Configure environment:
-
-```powershell
-cp .env.example .env
-# Update API endpoint if needed
-```
-
-4. Start the development server:
-
-```powershell
+2. Start the development server:
 npm start
-```
 
-The frontend will be available at `http://localhost:3000`
+## Environment Variables
 
-## 🔑 Environment Variables
-
-### Backend (.env)
-
-- `OPENAI_API_KEY` - OpenAI API key for chat and embeddings
+- `OPENAI_API_KEY` - OpenAI API key
 - `SESSION_SECRET_KEY` - Secret key for session middleware
 - `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME` - PostgreSQL connection
-- `ALLOWED_ORIGINS` - CORS origins (default: `http://localhost:3000`)
-- `LOG_LEVEL` - Logging level (INFO, DEBUG, etc.)
+- `ALLOWED_ORIGINS` - CORS origins
 
-See [.env.template](.env.template) for a complete list.
+See `.env.template` for the complete list.
 
-## 📚 Documentation
+## License
 
-- **Architecture Guide**: See [.github/copilot-instructions.md](.github/copilot-instructions.md)
-- **API Documentation**: Available at `/docs` when running the server
-- **Frontend README**: [frontend/README.md](frontend/README.md)
-- **GitHub Readiness**: [app/GITHUB_READY_CHECKLIST.md](app/GITHUB_READY_CHECKLIST.md)
-
-## 🧪 Testing
-
-```powershell
-# Run backend tests
-pytest
-
-# Run frontend tests
-cd frontend
-npm test
-```
-
-## 🛠️ Development
-
-### Database Migrations
-
-```powershell
-# Create a new migration
-alembic revision --autogenerate -m "Description"
-
-# Apply migrations
-alembic upgrade head
-
-# Rollback one migration
-alembic downgrade -1
-```
-
-### Code Quality
-
-```powershell
-# Format code
-black .
-
-# Lint code
-flake8 .
-
-# Type checking
-mypy .
-```
-
-## 📦 Tech Stack
-
-**Backend:**
-- FastAPI - Modern Python web framework
-- SQLAlchemy - SQL toolkit and ORM
-- PostgreSQL - Database
-- Alembic - Database migrations
-- OpenAI - GPT-3.5-turbo for AI chat
-- LangChain - LLM orchestration
-- ChromaDB - Vector database
-- Passlib - Password hashing
-
-**Frontend:**
-- React - UI library
-- TypeScript - Type-safe JavaScript
-- Tailwind CSS - Utility-first CSS
-- Vite - Build tool
-
-## 🔒 Security
-
-This project includes security best practices:
-- Password hashing with bcrypt
-- JWT token authentication
-- Environment-based secrets management
-- CORS configuration
-- Input sanitization
-
-This repository is the research target used in a systematic LLM 
-vulnerability assessment. This is the pre-hardening version, 
-intentionally representing a default GPT-3.5-turbo deployment 
-with no AI-specific security measures applied.
-
-Assessment was conducted using Garak and Giskard against OWASP 
-Top 10 for LLM Applications vulnerability categories.
-
-Findings before hardening:
-- DAN jailbreak resistance: 0%
-- Spam and phishing detection: 17%
-- Harmful content injection resistance: 10.6%
-
-Full findings, business impact analysis, and remediation methodology 
-are documented in the case study. Available on request.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## ⚠️ Important Notes
-
-- **Never commit** your `.env` file to version control
-- Rotate API keys before deploying to production
-- Use strong, randomly generated secrets for `SESSION_SECRET_KEY`
-- Review the security checklist in [app/GITHUB_READY_CHECKLIST.md](app/GITHUB_READY_CHECKLIST.md)
-
-## 📞 Support
-
-For issues and questions, please open a GitHub issue.
+MIT License. See LICENSE file for details.
 
 ---
 
-Research and development by Shrikant Pachpor 
-[linkedin.com/in/shrikantpachpor](https://linkedin.com/in/shrikantpachpor)
-
+Research and development by [Shrikant Pachpor](https://linkedin.com/in/shrikantpachpor)
