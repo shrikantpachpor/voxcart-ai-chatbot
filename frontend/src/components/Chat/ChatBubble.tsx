@@ -1,8 +1,6 @@
 import React from "react";
 import DOMPurify from "dompurify";
 import { Product } from "../../store/slices/chatSlice";
-import { useDispatch } from "react-redux";
-import { toggleCart, toggleProfileModal } from "../../store/slices/chatSlice";
 
 interface ChatBubbleProps {
   sender: "user" | "bot";
@@ -11,9 +9,6 @@ interface ChatBubbleProps {
 }
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({ sender, content, type }) => {
-  // Function to sanitize and format the content
-  const dispatch = useDispatch();
-
   const formatContent = (text: string): string => {
     const formattedText = text.replace(/\n/g, "<br />");
     return DOMPurify.sanitize(formattedText);
@@ -79,10 +74,15 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ sender, content, type }) => {
   };
 
   const renderContent = () => {
-    if (typeof content === "string" && content.includes("[[SHOW_PROFILE]]")) {
-      dispatch(toggleProfileModal(true));
-      return "Here's your profile details:";
+    let textContent = typeof content === "string" ? content : null;
+
+    if (textContent) {
+      textContent = textContent
+        .replace(/\n?\[\[SHOW_CART\]\]/g, "")
+        .replace(/\n?\[\[SHOW_PROFILE\]\]/g, "")
+        .trim();
     }
+
     switch (type) {
       case "product":
         const product = content as Product;
@@ -120,8 +120,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ sender, content, type }) => {
         );
 
       default:
-        // Render raw content for XSS testing
-        return renderRawContent(content as string);
+        return renderRawContent(formatContent((textContent ?? (content as string))));
     }
   };
 

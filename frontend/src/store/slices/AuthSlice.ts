@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { REHYDRATE } from "redux-persist";
 
 interface AuthState {
   isLoggedIn: boolean;
@@ -29,6 +30,15 @@ const authSlice = createSlice({
       state.user = null;
       localStorage.removeItem("access_token");
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(REHYDRATE, (state, action) => {
+      const incoming = (action as { payload?: { auth?: AuthState } }).payload?.auth;
+      if (incoming) {
+        state.user = incoming.user ?? state.user;
+      }
+      state.isLoggedIn = !!localStorage.getItem("access_token");
+    });
   },
 });
 

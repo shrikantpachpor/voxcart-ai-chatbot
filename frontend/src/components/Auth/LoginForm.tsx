@@ -22,8 +22,14 @@ const Login: React.FC = () => {
       localStorage.setItem("access_token", response.data.access_token);
       dispatch(loginSuccess({ username: credentials.username, email: "" }));
       navigate("/");
-    } catch (err) {
-      setError("Invalid username or password");
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: unknown }; message?: string };
+      const detail = axiosErr?.response?.data as { detail?: string } | undefined;
+      if (!axiosErr?.response && axiosErr?.message) {
+        setError(`Cannot reach API (${axiosErr.message}). Check backend is running and CORS allows ${window.location.origin}.`);
+      } else {
+        setError(detail?.detail ?? "Invalid username or password");
+      }
     }
   };
 
@@ -37,9 +43,10 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-16">
       <div className="max-w-md w-full p-6 bg-white rounded-lg shadow">
-        <h2 className="text-2xl font-bold mb-6 text-center">
+        <h2 className="text-2xl font-bold mb-2 text-center">
           Welcome Back! 👋
         </h2>
+        <p className="text-center text-gray-500 mb-6">Sign in to Voxbot</p>
         {error && <div className="text-red-500 mb-4 text-center">{error}</div>}
 
         {showForgotPassword ? (

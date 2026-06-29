@@ -152,3 +152,12 @@ start_dev.ps1
 frontend/.vite/
 frontend/src/**/dist/
 
+# Cursor / local IDE debug
+.cursor/
+
+# Debug session logs
+debug-*.log
+
+# Local ad-hoc scripts (not part of test suite)
+scripts/
+

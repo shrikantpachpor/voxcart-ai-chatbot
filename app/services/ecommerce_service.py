@@ -185,7 +185,31 @@ class EcommerceService:
         finally:
             db.close()
 
+    def update_cart_quantity(self, db, user_id: str, product_id: int, quantity: int):
+        """Set absolute quantity for a cart line item."""
+        user_id = str(user_id) if user_id else None
+        try:
+            cart_item = (
+                db.query(Cart)
+                .filter(Cart.user_id == user_id, Cart.product_id == product_id)
+                .first()
+            )
 
+            if not cart_item:
+                raise HTTPException(status_code=404, detail="Product not found in cart")
+
+            cart_item.quantity = quantity
+            cart_item.updated_at = datetime.utcnow()
+            db.commit()
+            return {"message": f"Updated quantity to {quantity}"}
+
+        except HTTPException:
+            db.rollback()
+            raise
+        except Exception as e:
+            db.rollback()
+            logging.error(f"Error updating cart quantity: {str(e)}")
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     def view_cart(self, db, user_id: str, session_id: str) -> CartResponse:
         """Returns cart items with proper user/session handling and database joins."""

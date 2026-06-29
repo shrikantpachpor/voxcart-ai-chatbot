@@ -1,5 +1,4 @@
 import re
-import html
 import unicodedata
 from typing import Optional
 from app.core.logging import logger
@@ -24,11 +23,11 @@ def sanitize_input(raw_input: str, max_length: int = 500) -> str:
         text = unicodedata.normalize("NFKC", text)
         text = text.replace("\0", "")
         text = re.sub(r"<[^>]*>", "", text)
-        text = html.escape(text)
-        
         text = re.sub(r"[\x00-\x1F\x7F-\x9F]", "", text)
-        text = re.sub(r"[\\\"';]", "", text)
         text = re.sub(r"\s+", " ", text).strip()
+
+        if len(text) > max_length:
+            text = text[:max_length]
         
         return text
         

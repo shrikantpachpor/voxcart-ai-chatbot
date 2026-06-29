@@ -32,7 +32,7 @@ const FloatingChat: React.FC = () => {
       <button
         onClick={() => dispatch(toggleChat())}
         className="fixed bottom-8 right-8 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition-all animate-bounce"
-        aria-label="Open chat"
+        aria-label="Open Voxbot chat"
       >
         <FaCommentDots className="w-6 h-6" />
       </button>
@@ -44,11 +44,11 @@ const FloatingChat: React.FC = () => {
       style={{ maxHeight, zIndex: 1000 }}
     >
       <div className="bg-blue-500 text-white p-4 rounded-t-xl flex justify-between items-center">
-        <h2 className="font-semibold">Shopping Assistant</h2>
+        <h2 className="font-semibold">Voxbot</h2>
         <button
           onClick={() => dispatch(toggleChat())}
           className="hover:text-gray-200 text-xl"
-          aria-label="Close chat"
+          aria-label="Close Voxbot chat"
         >
           <FaTimes />
         </button>

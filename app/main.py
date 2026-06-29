@@ -13,12 +13,12 @@ from app.models.database_models import User, UserCreate
 from app.core.security import get_password_hash
 
 # Initialize FastAPI app
-app = FastAPI(title="VoxCart API")
+app = FastAPI(title="Voxbot API")
 
 # Add CORS middleware FIRST so error responses also include CORS headers
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=config('ALLOWED_ORIGINS').split(','),
+    allow_origins=[origin.strip() for origin in config('ALLOWED_ORIGINS').split(',') if origin.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,7 +49,7 @@ app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 
 @app.get("/")
 async def home():
-    return {"message": "VoxCart API is running!"}
+    return {"message": "Voxbot API is running!"}
 
 @app.post("/register")
 async def register(user: UserCreate):

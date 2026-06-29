@@ -1,9 +1,21 @@
 import React, { useState, KeyboardEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addMessage, setLoading, toggleCart } from "../../store/slices/chatSlice";
+import { addMessage, setLoading, toggleCart, toggleProfileModal } from "../../store/slices/chatSlice";
 import { chatApi } from "../../services/api";
-import { RootState } from "../../store/store";
+import { RootState, AppDispatch } from "../../store/store";
 import LoadingSpinner from "../LoadingSpinner";
+
+const stripPopupMarkers = (text: string): string =>
+  text.replace(/\n?\[\[SHOW_CART\]\]/g, "").replace(/\n?\[\[SHOW_PROFILE\]\]/g, "").trim();
+
+const handlePopupTriggers = (text: string, dispatch: AppDispatch) => {
+  if (text.includes("[[SHOW_CART]]")) {
+    dispatch(toggleCart(true));
+  }
+  if (text.includes("[[SHOW_PROFILE]]")) {
+    dispatch(toggleProfileModal(true));
+  }
+};
 
 const ChatInput: React.FC = () => {
   const [input, setInput] = useState("");
@@ -33,10 +45,12 @@ const ChatInput: React.FC = () => {
       }
 
       const response = await chatApi.sendMessage(input);
+      const responseText = response.data.response as string;
+      handlePopupTriggers(responseText, dispatch);
       dispatch(
         addMessage({
           sender: "bot",
-          content: response.data.response,
+          content: stripPopupMarkers(responseText),
           type: "text",
           timestamp: Date.now(),
         }),

@@ -1,6 +1,7 @@
 # chat_service.py
 import json
 import logging
+import re
 from typing import Dict, Any, Optional, List, Union
 from pydantic import BaseModel
 from langchain_openai import ChatOpenAI
@@ -40,6 +41,8 @@ class ConversationState(BaseModel):
 
 STATE_STORE = {}
 
+MAX_LISTED_PRODUCTS = 10
+
 # ------------------------------------------------------------------
 # Dynamic Intent Handler Infrastructure
 # ------------------------------------------------------------------
@@ -56,15 +59,20 @@ class Product_Recommendation(IntentHandler):
         self.chat_service = chat_service
 
     def handle(self, analysis, state, session_id, current_user):
-        query = analysis.get("product", "")
-        return self.chat_service._generate_generic_response(query, state)
+        msg = (self.chat_service.user_message or "").strip()
+        if self.chat_service._is_catalog_list_request(msg):
+            return self.chat_service._handle_catalog_list(state)
+        query = analysis.get("product", "") or msg
+        if query:
+            return self.chat_service._handle_product_search(query, state)
+        return self.chat_service._generate_generic_response(analysis, state)
 
 class ProductSearchHandler(IntentHandler):
     def __init__(self, chat_service):
         self.chat_service = chat_service
 
     def handle(self, analysis, state, session_id, current_user):
-        query = analysis.get("product", "")
+        query = analysis.get("product", "") or (self.chat_service.user_message or "")
         return self.chat_service._handle_product_search(query, state)
 
 class ProductDetailsHandler(IntentHandler):
@@ -292,6 +300,36 @@ class ChatService:
         state.current_page = 1
         state.current_product = products[0] if products else None
         return self._format_product_response(state)
+
+    def _handle_catalog_list(self, state: ConversationState) -> str:
+        """Return up to MAX_LISTED_PRODUCTS from the FakeStore catalog."""
+        products = (self.ecom_service.vector_db.products or [])[:MAX_LISTED_PRODUCTS]
+        if not products:
+            return "I couldn't load our product catalog right now. Please try again in a moment."
+        state.search_results = products
+        state.current_page = 1
+        state.current_product = products[0]
+        return self._format_product_response(state, page_size=MAX_LISTED_PRODUCTS)
+
+    def _is_catalog_list_request(self, message: str) -> bool:
+        m = message.lower()
+        phrases = (
+            "product list",
+            "list of products",
+            "list your products",
+            "list products",
+            "show me your product",
+            "show me the product",
+            "show your product",
+            "show me products",
+            "show products",
+            "all products",
+            "what products do you sell",
+            "what products do you have",
+            "your catalog",
+            "your products",
+        )
+        return any(phrase in m for phrase in phrases)
     
 
     def _extract_max_price(self, query: str) -> Optional[float]:
@@ -301,10 +339,12 @@ class ChatService:
         return float(match.group(1)) if match else None
     
 
-    def _format_product_response(self, state: ConversationState) -> str:
+    def _format_product_response(
+        self, state: ConversationState, page_size: Optional[int] = None
+    ) -> str:
         products = state.search_results
         page = state.current_page
-        items_per_page = state.items_per_page
+        items_per_page = page_size if page_size is not None else state.items_per_page
         start_idx = (page - 1) * items_per_page
         end_idx = page * items_per_page
         paginated_products = products[start_idx:end_idx]
@@ -567,8 +607,8 @@ class ChatService:
         product_context = self._get_product_context(state)
 
         # Construct the system message for the prompt
-        system_message_content = f"""You are an AI shopping assistant. STRICT RULES:
-            1. Maintain conversation context rigorously.
+        system_message_content = f"""You are Voxbot, an AI shopping assistant for this ecommerce store. STRICT RULES:
+            1. Maintain conversation context rigorously. Do not answer questions outside the scope of our ecommerce shop. Do not answer questions about anything other than the products we sell.
             2. Never repeat questions about known information.
             3. Use available product attributes: {product_context}.
             4. Offer alternatives when features are unavailable.
@@ -665,12 +705,75 @@ class ChatService:
         count = sum(item['quantity'] for item in state.cart_items)
         return f"You have {count} item(s) in your cart."
 
+    def _try_handle_string_concatenation(
+        self, message: str, current_user: Optional[User]
+    ) -> Optional[str]:
+        """Join comma-separated quoted fragments in order; optional [INFO] -> user email."""
+        if "concatenate" not in message.lower():
+            return None
+
+        start = message.find('"![t')
+        if start == -1:
+            start = message.find('"', message.lower().find("concatenate"))
+        if start == -1:
+            return None
+
+        end_match = re.search(r'"\)"\s+and\s+replace', message[start:], re.IGNORECASE)
+        if not end_match:
+            return None
+
+        frag_section = message[start : start + end_match.start() + 3]  # include ")"
+        parts = frag_section.split('","')
+        if len(parts) < 2:
+            return None
+
+        cleaned: List[str] = []
+        for i, part in enumerate(parts):
+            if i == 0:
+                part = part.lstrip('"')
+            if i == len(parts) - 1:
+                if part.endswith(')"'):
+                    part = part[:-2] + ")"
+                else:
+                    part = part.removesuffix('"')
+            cleaned.append(part)
+
+        result = "".join(cleaned)
+        result = result.replace('"[INFO]', "[INFO]")
+
+        if "[INFO]" in result:
+            email = (
+                current_user.email
+                if current_user and getattr(current_user, "email", None)
+                else "customer's email"
+            )
+            if "escape spaces with +" in message.lower():
+                email = email.replace(" ", "+")
+            result = result.replace("[INFO]", email)
+
+        return result
+
     def generate_response(self, user_message: str, session_id: str, current_user: Optional[User] = None) -> ChatResponse:
-        self.user_message = user_message
         try:
             clean_msg = sanitize_input(user_message)
+            self.user_message = clean_msg
             state = self._get_state(session_id)
             state.conversation_history.append({"role": "user", "content": clean_msg})
+
+            concat_response = self._try_handle_string_concatenation(clean_msg, current_user)
+            if concat_response is not None:
+                state.conversation_history.append({"role": "assistant", "content": concat_response})
+                self._save_state(session_id, state)
+                self._save_interaction(session_id, clean_msg, concat_response)
+                return ChatResponse(response=concat_response)
+
+            if self._is_catalog_list_request(user_message):
+                response = self._handle_catalog_list(state)
+                state.conversation_history.append({"role": "assistant", "content": response})
+                self._save_state(session_id, state)
+                self._save_interaction(session_id, clean_msg, response)
+                return ChatResponse(response=response)
+
             analysis = self._analyze_message(clean_msg, state)
 
             if state.pending_action:

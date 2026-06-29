@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
     <nav className="bg-white shadow-md p-4 fixed w-full top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="text-2xl font-bold text-blue-600">
-          Ecommerce Chatbot
+          Voxbot
         </Link>
         <div className="flex items-center gap-6">
           {isLoggedIn && (

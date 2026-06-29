@@ -24,6 +24,10 @@ class RemoveFromCartRequest(BaseModel):
     product_id: int
     quantity: Optional[int] = None  
 
+class UpdateCartRequest(BaseModel):
+    product_id: int
+    quantity: int = Field(..., ge=1)
+
 class ViewCartRequest(BaseModel):
     user_id: str
 

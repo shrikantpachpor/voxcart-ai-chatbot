@@ -5,7 +5,7 @@ import logging
 
 from app.models.request_models import (
     ChatRequest, OrderStatusRequest, RecommendationRequest, 
-    AddToCartRequest, RemoveFromCartRequest, CheckoutRequest, 
+    AddToCartRequest, RemoveFromCartRequest, UpdateCartRequest, CheckoutRequest, 
     LoginRequest, UpdateLocationRequest
 )
 from app.models.response_models import ChatResponse
@@ -52,6 +52,22 @@ async def direct_remove_from_cart(
             quantity=request.quantity
         )
         return result
+    finally:
+        db.close()
+
+@router.post("/update-cart")
+async def update_cart(
+    request: UpdateCartRequest,
+    current_user: User = Depends(get_current_user),
+):
+    db = SessionLocal()
+    try:
+        return EcommerceService().update_cart_quantity(
+            db=db,
+            user_id=str(current_user.id),
+            product_id=request.product_id,
+            quantity=request.quantity,
+        )
     finally:
         db.close()
 

@@ -1,8 +1,27 @@
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import { persistReducer, persistStore } from "redux-persist";
+import {
+  configureStore,
+  combineReducers,
+  isAnyOf,
+  Middleware,
+} from "@reduxjs/toolkit";
+import {
+  persistReducer,
+  persistStore,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import authReducer from "./slices/authSlice";
-import chatReducer, { resetChatState } from "./slices/chatSlice";
+import chatReducer, {
+  syncCart,
+  updateCartItemQuantity,
+  removeFromCart,
+  addToCart,
+} from "./slices/chatSlice";
 
 const authPersistConfig = {
   key: "auth",
@@ -13,13 +32,7 @@ const authPersistConfig = {
 const chatPersistConfig = {
   key: "chat",
   storage,
-  whitelist: ["cart", "messages"],
-  migrate: (state: any) =>
-    Promise.resolve({
-      ...state,
-      cart: state?.cart || [],
-      messages: state?.messages || [],
-    }),
+  whitelist: ["cart", "messages", "isCartOpen"],
 };
 
 const rootReducer = combineReducers({
@@ -27,14 +40,31 @@ const rootReducer = combineReducers({
   chat: persistReducer(chatPersistConfig, chatReducer),
 });
 
+let persistorRef: ReturnType<typeof persistStore> | null = null;
+
+const cartFlushMiddleware: Middleware = () => (next) => (action) => {
+  const result = next(action);
+  if (
+    persistorRef &&
+    isAnyOf(syncCart, updateCartItemQuantity, removeFromCart, addToCart)(action)
+  ) {
+    void persistorRef.flush();
+  }
+  return result;
+};
+
 export const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
-    }),
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }).concat(cartFlushMiddleware),
 });
 
 export const persistor = persistStore(store);
+persistorRef = persistor;
+
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

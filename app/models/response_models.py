@@ -19,6 +19,7 @@ class CartItem(BaseModel):
     quantity: int
     product_name: str
     price: float
+    image: Optional[str] = None
 
 class CartResponse(BaseModel):
     items: List[CartItem]

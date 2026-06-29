@@ -14,16 +14,20 @@ import {
 import { chatApi } from "../../services/api";
 import LoadingSpinner from "../LoadingSpinner";
 import { FaTimes } from "react-icons/fa";
-import { PaymentMethod, CartItem, CartResponse } from "../../store/types/payment";
+import { PaymentMethod } from "../../store/types/payment";
+import { mapApiCartToProducts, shouldApplyCartSync } from "../../utils/cart";
 
 const CartSidebar: React.FC = () => {
   const { 
     cart = [], 
-    isCartLoading, 
+    isCartLoading,
+    isCartOpen,
     paymentMethods 
   } = useSelector((state: RootState) => state.chat);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [updatingProductId, setUpdatingProductId] = useState<number | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number | null>(null);
   const [cardDetails, setCardDetails] = useState({
     card_number: "",
@@ -34,24 +38,29 @@ const CartSidebar: React.FC = () => {
   });
 
   useEffect(() => {
+    if (!isCartOpen) return;
+
     const fetchCartAndPayments = async () => {
       try {
-        dispatch(setCartLoading(true));
+        setIsInitializing(true);
         
         const cartResponse = await chatApi.getCart();
-        dispatch(syncCart(cartResponse.data.items));
+        const products = mapApiCartToProducts(cartResponse.data);
+        if (shouldApplyCartSync(cart, products)) {
+          dispatch(syncCart(products));
+        }
 
         const paymentResponse = await chatApi.getPaymentMethods();
         dispatch(setPaymentMethods(paymentResponse.data));
       } catch (error) {
         // Error loading cart and payment methods
       } finally {
-        dispatch(setCartLoading(false));
+        setIsInitializing(false);
       }
     };
 
     fetchCartAndPayments();
-  }, [dispatch]);
+  }, [dispatch, isCartOpen]);
 
   const handleCheckout = async () => {
     try {
@@ -98,26 +107,39 @@ const CartSidebar: React.FC = () => {
   };
 
   const handleRemoveItem = async (productId: number) => {
+    if (updatingProductId === productId) return;
+
+    const previousCart = cart.map((item) => ({ ...item }));
+    dispatch(removeFromCart(productId));
+    setUpdatingProductId(productId);
+
     try {
-      dispatch(setCartLoading(true));
       await chatApi.removeFromCart(productId);
-      dispatch(removeFromCart(productId));
     } catch (error) {
-      // Error removing item
+      dispatch(syncCart(previousCart));
     } finally {
-      dispatch(setCartLoading(false));
+      setUpdatingProductId(null);
     }
   };
 
   const handleQuantityChange = async (productId: number, quantity: number) => {
+    if (updatingProductId === productId) return;
+
+    if (quantity < 1) {
+      await handleRemoveItem(productId);
+      return;
+    }
+
+    const previousCart = cart.map((item) => ({ ...item }));
+    dispatch(updateCartItemQuantity({ id: productId, quantity }));
+    setUpdatingProductId(productId);
+
     try {
-      dispatch(setCartLoading(true));
       await chatApi.updateCart(productId, quantity);
-      dispatch(updateCartItemQuantity({ id: productId, quantity }));
     } catch (error) {
-      // Error updating quantity
+      dispatch(syncCart(previousCart));
     } finally {
-      dispatch(setCartLoading(false));
+      setUpdatingProductId(null);
     }
   };
 
@@ -130,7 +152,7 @@ const CartSidebar: React.FC = () => {
           Your Cart ({cart.reduce((sum, item) => sum + item.quantity, 0)})
         </h3>
         <button
-          onClick={() => dispatch(toggleCart())}
+          onClick={() => dispatch(toggleCart(false))}
           className="text-gray-500 hover:text-gray-700"
           aria-label="Close cart"
         >
@@ -138,7 +160,7 @@ const CartSidebar: React.FC = () => {
         </button>
       </div>
 
-      {isCartLoading ? (
+      {isInitializing ? (
         <div className="flex justify-center py-8">
           <LoadingSpinner />
         </div>
@@ -152,7 +174,9 @@ const CartSidebar: React.FC = () => {
             {cart.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                className={`flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-colors ${
+                  updatingProductId === item.id ? "opacity-60" : ""
+                }`}
               >
                 <div className="flex items-center space-x-4 flex-1">
                   <img
@@ -169,9 +193,14 @@ const CartSidebar: React.FC = () => {
                     </p>
                     <div className="flex items-center mt-1">
                       <button
-                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                        className="px-2 py-1 bg-gray-100 rounded-l hover:bg-gray-200"
-                        disabled={item.quantity <= 1}
+                        onClick={() =>
+                          item.quantity <= 1
+                            ? handleRemoveItem(item.id)
+                            : handleQuantityChange(item.id, item.quantity - 1)
+                        }
+                        className="px-2 py-1 bg-gray-100 rounded-l hover:bg-gray-200 disabled:opacity-50"
+                        disabled={updatingProductId === item.id}
+                        aria-label={item.quantity <= 1 ? "Remove item" : "Decrease quantity"}
                       >
                         -
                       </button>
@@ -180,7 +209,8 @@ const CartSidebar: React.FC = () => {
                       </span>
                       <button
                         onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                        className="px-2 py-1 bg-gray-100 rounded-r hover:bg-gray-200"
+                        className="px-2 py-1 bg-gray-100 rounded-r hover:bg-gray-200 disabled:opacity-50"
+                        disabled={updatingProductId === item.id}
                       >
                         +
                       </button>
@@ -189,7 +219,8 @@ const CartSidebar: React.FC = () => {
                 </div>
                 <button
                   onClick={() => handleRemoveItem(item.id)}
-                  className="text-red-500 hover:text-red-600 ml-2 transition-opacity"
+                  className="text-red-500 hover:text-red-600 ml-2 transition-opacity disabled:opacity-50"
+                  disabled={updatingProductId === item.id}
                   aria-label={`Remove ${item.title} from cart`}
                 >
                   ×

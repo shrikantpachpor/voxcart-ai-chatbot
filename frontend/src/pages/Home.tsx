@@ -18,17 +18,17 @@ const Home: React.FC = () => {
     <div className="pt-20 min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 flex gap-8">
         {isCartOpen && (
-          <div className="w-80 flex-shrink-0">
+          <div className="w-80 flex-shrink-0 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto">
             <CartSidebar />
           </div>
         )}
         <div className="flex-1">
           <div className="mb-10">
             <h1 className="text-3xl font-bold text-gray-900">
-              Welcome to Ecommerce Chatbot
+              Welcome to Voxbot
             </h1>
             <p className="mt-2 text-lg text-gray-600">
-              Your personal shopping assistant is here to help
+              Voxbot is your ecommerce chatbot — search products, manage your cart, and checkout
             </p>
           </div>
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">

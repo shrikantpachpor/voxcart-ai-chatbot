@@ -38,9 +38,12 @@ import FloatingChat from "./components/Chat/FloatingChat";
 import Navbar from "./components/Layout/Navbar";
 import { useSelector } from "react-redux";
 import { RootState } from "./store/store";
+import { useCartSync, useCartPersistFlush } from "./hooks/useCartSync";
 
 const App: React.FC = () => {
   const { isLoggedIn } = useSelector((state: RootState) => state.auth);
+  useCartSync();
+  useCartPersistFlush();
 
   return (
     <Router>

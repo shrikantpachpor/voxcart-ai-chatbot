@@ -47,9 +47,9 @@ export const chatApi = {
   getCart: (response_format: string = "api") => 
     api.post("/chat/view-cart/", { response_format:"json" }), // Fixed URL and body
   updateCart: (productId: number, quantity: number) =>
-    api.post("/update_cart/", { product_id: productId, quantity }),
+    api.post("/chat/update-cart", { product_id: productId, quantity }),
   removeFromCart: (productId: number) =>
-    api.post("/remove-from-cart/", { product_id: productId }),
+    api.post("/chat/remove-from-cart", { product_id: productId }),
   getRecommendations: () => api.get("/chat/recommendations/"),
   
   addPaymentMethod: (data: AddPaymentMethodRequest) =>

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { REHYDRATE } from "redux-persist";
 
 type MessageType = "text" | "product" | "recommendation" | "cart";
 
@@ -82,8 +83,10 @@ const chatSlice = createSlice({
     toggleChat: (state) => {
       state.isChatOpen = !state.isChatOpen;
     },
-    toggleCart: (state) => {
-      state.isCartOpen = !state.isCartOpen;
+    toggleCart: (state, action: PayloadAction<boolean | undefined>) => {
+      state.isCartOpen = typeof action.payload !== "undefined"
+        ? action.payload
+        : !state.isCartOpen;
     },
     setCartLoading: (state, action: PayloadAction<boolean>) => {
       state.isCartLoading = action.payload;
@@ -127,6 +130,15 @@ const chatSlice = createSlice({
     syncCart: (state, action: PayloadAction<Product[]>) => {
       state.cart = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(REHYDRATE, (state, action) => {
+      const incoming = (action as { payload?: { chat?: { cart?: Product[] } } })
+        .payload?.chat;
+      if (incoming?.cart && Array.isArray(incoming.cart)) {
+        state.cart = incoming.cart;
+      }
+    });
   },
 });
 

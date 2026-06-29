@@ -23,7 +23,8 @@ const RegisterForm: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-bold mb-6">Create Account 🚀</h2>
+      <h2 className="text-2xl font-bold mb-2">Create Account 🚀</h2>
+      <p className="text-gray-500 mb-6">Join Voxbot to start shopping</p>
       <form onSubmit={handleRegister} className="space-y-4">
         <input
           type="text"
